@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PortReady</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: an admissions "file folder" — the student's portfolio sheet on the left, one checklist slip per target program on the right, each stamped READY / ALMOST / NOT YET. */
+:root {
+  --paper: #EEF1F6;
+  --sheet: #FFFFFF;
+  --ink: #15203A;
+  --ink-2: #4C5875;
+  --line: #D5DBE6;
+  --accent: #2C47C9;
+  --accent-soft: #E4E9FC;
+  --mark: #FFE36E;
+  --ok: #1D7A4C;
+  --ok-soft: #E2F3EA;
+  --warn: #A86200;
+  --warn-soft: #FCF0DC;
+  --bad: #B3261E;
+  --bad-soft: #FBE5E3;
+  --f-display: "Anuphan", "IBM Plex Sans Thai", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1320; --sheet: #161D2E; --ink: #E6EAF3; --ink-2: #A0ABC4; --line: #2A3450;
+    --accent: #93A6FF; --accent-soft: #222C52; --mark: #6B5A12;
+    --ok: #5BCB92; --ok-soft: #173326; --warn: #F2B54C; --warn-soft: #3A2B10; --bad: #FF8A7E; --bad-soft: #3D1A18;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1320; --sheet: #161D2E; --ink: #E6EAF3; --ink-2: #A0ABC4; --line: #2A3450;
+  --accent: #93A6FF; --accent-soft: #222C52; --mark: #6B5A12;
+  --ok: #5BCB92; --ok-soft: #173326; --warn: #F2B54C; --warn-soft: #3A2B10; --bad: #FF8A7E; --bad-soft: #3D1A18;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 56px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+
+/* header */
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 2px solid var(--ink); margin-bottom: 24px; }
+.brand { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.brand h1 { font: 700 2.1rem/1.05 var(--f-display); margin: 0; letter-spacing: -0.02em; }
+.brand h1 span { background: linear-gradient(transparent 58%, var(--mark) 58%); padding-inline: 2px; }
+.brand p { margin: 0; color: var(--ink-2); max-width: 60ch; text-wrap: balance; }
+.tag { font: 600 0.72rem/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 4px; padding: 6px 8px; white-space: nowrap; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; min-width: 0; }
+.sheet + .sheet { margin-top: 16px; }
+.eyebrow { font: 600 0.72rem/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 6px; }
+h2 { font: 700 1.25rem/1.25 var(--f-display); margin: 0 0 14px; text-wrap: balance; }
+h3 { font: 600 1.05rem/1.3 var(--f-display); margin: 0; text-wrap: balance; }
+
+/* form */
+form { display: flex; flex-direction: column; gap: 14px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+label, .lbl { font-size: 0.82rem; font-weight: 600; color: var(--ink-2); }
+.hint { font-size: 0.78rem; color: var(--ink-2); font-weight: 400; }
+input[type=text], input[type=number], select, textarea {
+  font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+textarea { resize: vertical; min-height: 84px; line-height: 1.45; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, .chip:focus-within, .sec:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=number] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.secs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+@media (max-width: 420px) { .secs, .row { grid-template-columns: 1fr; } }
+.sec { display: flex; gap: 8px; align-items: flex-start; font-size: 0.85rem; padding: 7px 8px; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; line-height: 1.3; }
+.sec input { margin-top: 2px; accent-color: var(--accent); }
+.sec small { display: block; color: var(--ink-2); font-size: 0.75rem; }
+.filebtn { font-size: 0.8rem; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; padding: 0; font-weight: 600; }
+
+/* buttons */
+.btn { font: 600 0.92rem/1 var(--f-body); border-radius: 8px; padding: 11px 16px; cursor: pointer; border: 1.5px solid var(--ink); background: var(--ink); color: var(--sheet); display: inline-flex; align-items: center; gap: 8px; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* programs */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 8px; cursor: pointer; font-size: 0.85rem; background: var(--sheet); max-width: 100%; }
+.chip input { accent-color: var(--accent); margin: 0; }
+.chip.on { border-color: var(--accent); background: var(--accent-soft); }
+.chip b { font-weight: 600; }
+.chip .u { font-family: var(--f-mono); font-size: 0.72rem; color: var(--ink-2); letter-spacing: 0.04em; }
+.chip .new { font: 600 0.65rem/1 var(--f-mono); color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+
+details.add { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+details.add summary { cursor: pointer; font-weight: 600; color: var(--accent); font-size: 0.9rem; }
+details.add .inner { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+
+.note { font-size: 0.78rem; color: var(--ink-2); border-left: 3px solid var(--mark); padding: 2px 0 2px 10px; margin: 14px 0 0; }
+
+/* summary strip */
+.summary { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin: 4px 0 16px; }
+.summary .k { font: 600 0.7rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); }
+.summary .v { font: 700 1.5rem/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.summary > div { display: flex; flex-direction: column; gap: 4px; }
+
+/* result slips */
+.slips { display: flex; flex-direction: column; gap: 14px; }
+.slip { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; position: relative; min-width: 0; }
+.slip-head { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+@media (max-width: 520px) { .slip-head { grid-template-columns: 56px minmax(0, 1fr); } .slip-head .stamp { grid-column: 1 / -1; justify-self: start; } }
+.ring { width: 64px; height: 64px; max-width: 100%; }
+.ring text { font: 700 17px var(--f-display); fill: var(--ink); }
+.uni { font: 600 0.72rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); margin-bottom: 3px; }
+.meta { font-size: 0.8rem; color: var(--ink-2); margin-top: 3px; }
+.stamp { font: 600 0.78rem/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; border: 2px solid currentColor; border-radius: 5px; padding: 7px 10px; transform: rotate(-5deg); white-space: nowrap; }
+.stamp.ready { color: var(--ok); } .stamp.almost { color: var(--warn); } .stamp.not_yet { color: var(--bad); }
+
+.checks { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.checks li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+.checks li:last-child { border-bottom: 0; }
+.ic { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 0.75rem/1 var(--f-mono); }
+.ic.pass { background: var(--ok-soft); color: var(--ok); }
+.ic.warn { background: var(--warn-soft); color: var(--warn); }
+.ic.fail { background: var(--bad-soft); color: var(--bad); }
+.checks b { font-weight: 600; }
+.checks .d { color: var(--ink-2); display: block; }
+
+.lookfor { margin-top: 12px; font-size: 0.85rem; background: var(--paper); border-radius: 7px; padding: 10px 12px; }
+.lookfor .lbl { display: block; margin-bottom: 2px; }
+
+/* AI */
+.ai-panel { margin-top: 14px; border: 1.5px solid var(--accent); border-radius: 8px; padding: 14px; background: var(--accent-soft); }
+.ai-panel h4 { margin: 0 0 6px; font: 600 0.72rem/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.ai-panel p { margin: 0 0 8px; }
+.ai-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 720px) { .ai-cols { grid-template-columns: minmax(0, 1fr); } }
+.ai-cols ul { margin: 4px 0 0; padding-left: 18px; font-size: 0.86rem; }
+.ai-cols li + li { margin-top: 3px; }
+.ai-cols .lbl { color: var(--ink); }
+
+.ai-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; margin-bottom: 14px; }
+.ai-bar .txt { min-width: 0; flex: 1 1 260px; font-size: 0.88rem; color: var(--ink-2); }
+.ai-bar .txt strong { color: var(--ink); display: block; font-family: var(--f-display); font-size: 1rem; }
+.status { font-size: 0.85rem; color: var(--ink-2); }
+.status.err { color: var(--bad); }
+.overall { background: var(--sheet); border: 1.5px solid var(--accent); border-radius: var(--r); padding: 16px 18px; margin-bottom: 14px; }
+.overall p { margin: 0; }
+.overall ol { margin: 8px 0 0; padding-left: 20px; font-size: 0.88rem; }
+
+.empty { text-align: center; padding: 40px 20px; color: var(--ink-2); border: 1.5px dashed var(--line); border-radius: var(--r); }
+.dots::after { content: "…"; animation: blink 1.2s steps(3) infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) { .dots::after { animation: none; } }
+footer { margin-top: 32px; font-size: 0.78rem; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1><span>PortReady</span></h1>
+      <p>Check your TCAS Round 1 portfolio against each university's requirements, then get AI feedback on what to fix before you submit.</p>
+    </div>
+    <div class="tag">Biztania 2026 · Prototype</div>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: student file -->
+    <div>
+      <section class="sheet" aria-labelledby="h-you">
+        <p class="eyebrow">Step 1 · Your file</p>
+        <h2 id="h-you">Your portfolio</h2>
+        <form id="profile" autocomplete="off">
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input type="text" id="f-name">
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="f-gpax">GPAX <span class="hint">(5 semesters)</span></label>
+              <input type="number" id="f-gpax" min="0" max="4" step="0.01">
+            </div>
+            <div class="field">
+              <label for="f-pages">Portfolio pages</label>
+              <input type="number" id="f-pages" min="1" max="60" step="1">
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="f-eng">English test</label>
+              <select id="f-eng">
+                <option value="">None yet</option>
+                <option>IELTS</option>
+                <option>TOEFL iBT</option>
+                <option>DET</option>
+                <option>CU-TEP</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-engscore">Score</label>
+              <input type="number" id="f-engscore" min="0" step="0.5">
+            </div>
+          </div>
+          <div class="field">
+            <span class="lbl">Sections in your portfolio</span>
+            <div class="secs" id="secs"></div>
+          </div>
+          <div class="field">
+            <label for="f-act">Activities &amp; projects <span class="hint">one per line</span></label>
+            <textarea id="f-act" rows="4"></textarea>
+          </div>
+          <div class="field">
+            <label for="f-awards">Awards &amp; certificates <span class="hint">one per line</span></label>
+            <textarea id="f-awards" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label for="f-text">Portfolio text <span class="hint">optional, for the AI review</span></label>
+            <textarea id="f-text" rows="4" placeholder="Paste your introduction or statement of purpose here"></textarea>
+            <div><button type="button" class="filebtn" id="loadTxt">Load from a .txt file</button><input type="file" id="txtFile" accept=".txt,.md,text/plain" hidden></div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="clearBtn">Clear form</button>
+            <button type="button" class="btn ghost" id="sampleBtn">Load example student</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- RIGHT: programs + report -->
+    <div style="min-width:0">
+      <section class="sheet" aria-labelledby="h-targets">
+        <p class="eyebrow">Step 2 · Targets</p>
+        <h2 id="h-targets">Programs you're applying to</h2>
+        <div class="chips" id="chips"></div>
+        <details class="add" id="addBox">
+          <summary>Add a program from its admission announcement</summary>
+          <div class="inner">
+            <p class="hint" style="margin:0">Paste the requirement section from a faculty's TCAS announcement (Thai or English). The AI reads it and turns it into a checklist.</p>
+            <textarea id="annText" rows="5" placeholder="เช่น ผู้สมัครต้องมีผลการเรียนเฉลี่ยสะสม (GPAX) ไม่ต่ำกว่า 3.25 … Portfolio ไม่เกิน 10 หน้า …"></textarea>
+            <div class="btn-row">
+              <button type="button" class="btn" id="parseBtn">Read requirements</button>
+              <span class="status" id="parseStatus"></span>
+            </div>
+          </div>
+        </details>
+        <p class="note">Built-in requirements are sample data for this prototype. Always confirm on the faculty's official announcement and mytcas.com.</p>
+      </section>
+
+      <section style="margin-top:24px" aria-labelledby="h-report">
+        <p class="eyebrow">Step 3 · Report</p>
+        <h2 id="h-report">Readiness report</h2>
+        <div class="summary" id="summary"></div>
+        <div class="ai-bar">
+          <div class="txt"><strong>AI portfolio review</strong><span id="aiHint">Reads your portfolio against every program you picked and tells you what to fix first.</span></div>
+          <div class="btn-row">
+            <select id="aiLang" aria-label="Feedback language"><option value="English">English</option><option value="Thai">ภาษาไทย</option></select>
+            <button type="button" class="btn" id="aiBtn">Review with AI</button>
+            <button type="button" class="btn ghost" id="stopBtn" hidden>Stop</button>
+          </div>
+        </div>
+        <p class="status" id="aiStatus" hidden></p>
+        <div id="overall"></div>
+        <div class="slips" id="slips"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>PortReady prototype for CU–TU Biztania Camp 2026, Engineering Track. Your entries stay in this browser.</footer>
+</div>
+
+<script>
+(() => {
+  const SECTIONS = [
+    { id: "intro", en: "Introduction", th: "ประวัติส่วนตัว" },
+    { id: "education", en: "Education history", th: "ประวัติการศึกษา" },
+    { id: "transcript", en: "Transcript", th: "ปพ.1" },
+    { id: "activities", en: "Activities", th: "กิจกรรม" },
+    { id: "awards", en: "Awards & certificates", th: "เกียรติบัตร" },
+    { id: "projects", en: "Projects & work", th: "ผลงาน / โครงงาน" },
+    { id: "sop", en: "Statement of purpose", th: "เหตุผลที่อยากเรียน" },
+    { id: "english_cert", en: "English score report", th: "ผลสอบภาษาอังกฤษ" },
+  ];
+  const secName = id => (SECTIONS.find(s => s.id === id) || { en: id }).en;
+
+  // Sample requirement data for the prototype (illustrative, not official).
+  const BUILTIN = [
+    { id: "cu-cedt", uni: "Chulalongkorn", faculty: "Faculty of Engineering", program: "Computer Engineering & Digital Technology (CEDT)",
+      minGpax: 3.00, english: null, maxPages: 10, required: ["intro", "education", "transcript", "activities", "projects", "sop"], preferAwards: true,
+      keywords: ["programming", "coding", "code", "software", "robot", "app", "computer", "olympiad", "hackathon", "ai", "data", "web", "arduino", "python"],
+      lookFor: "Proof you build things with code: projects, competitions, and self-learning you can show." },
+    { id: "cu-bba", uni: "Chulalongkorn", faculty: "Commerce & Accountancy", program: "BBA International Program",
+      minGpax: 3.00, english: { "IELTS": 6.5, "TOEFL iBT": 79, "DET": 120 }, maxPages: 10, required: ["intro", "education", "transcript", "activities", "awards", "sop", "english_cert"], preferAwards: true,
+      keywords: ["business", "leadership", "leader", "president", "startup", "marketing", "finance", "entrepreneur", "sales", "economics", "case competition", "club"],
+      lookFor: "Leadership roles and real business exposure, written in strong English." },
+    { id: "tu-tep", uni: "Thammasat", faculty: "Sirindhorn Intl. Inst. / Engineering", program: "TEP–TEPE Engineering",
+      minGpax: 2.75, english: { "IELTS": 5.5, "TOEFL iBT": 61, "DET": 95, "CU-TEP": 60 }, maxPages: 10, required: ["intro", "education", "transcript", "activities", "projects", "english_cert"], preferAwards: false,
+      keywords: ["engineering", "science", "physics", "math", "robot", "research", "project", "experiment", "camp", "design"],
+      lookFor: "Interest in engineering shown through science projects, camps, or hands-on building." },
+    { id: "kmitl-se", uni: "KMITL", faculty: "School of Engineering", program: "Software Engineering (International)",
+      minGpax: 2.75, english: { "IELTS": 5.5, "TOEFL iBT": 61, "DET": 95 }, maxPages: 10, required: ["intro", "education", "transcript", "projects", "sop"], preferAwards: false,
+      keywords: ["software", "programming", "coding", "app", "web", "hackathon", "github", "game", "python", "java", "code"],
+      lookFor: "Software you have shipped: apps, websites, games, or repositories with real code." },
+    { id: "mu-ict", uni: "Mahidol", faculty: "Faculty of ICT", program: "Information & Communication Technology (Intl.)",
+      minGpax: 2.50, english: { "IELTS": 5.5, "TOEFL iBT": 61, "DET": 100 }, maxPages: 10, required: ["intro", "education", "transcript", "activities", "sop"], preferAwards: false,
+      keywords: ["technology", "computer", "design", "data", "programming", "digital", "multimedia", "website", "app", "media"],
+      lookFor: "Curiosity about technology and how people use it, including design and digital media." },
+    { id: "ku-cpe", uni: "Kasetsart", faculty: "Faculty of Engineering", program: "Computer Engineering",
+      minGpax: 3.00, english: null, maxPages: 10, required: ["intro", "education", "transcript", "activities", "projects"], preferAwards: true,
+      keywords: ["programming", "computer", "robot", "electronics", "arduino", "olympiad", "coding", "circuit", "embedded"],
+      lookFor: "Hands-on computing and electronics, with competition results if you have them." },
+  ];
+
+  const EXAMPLE = {
+    name: "Ploy (example student)", gpax: 3.62, pages: 12, engType: "IELTS", engScore: 6.0,
+    sections: ["intro", "education", "transcript", "activities", "awards", "projects"],
+    activities: "Built a line-following robot with Arduino for the school science fair\nCoding club member, taught Scratch to M.1 students for one term\nVice president of the student council, ran the school sports day budget\nVolunteer at a weekend reading camp in Nan province",
+    awards: "Silver medal, provincial robotics contest 2025\nCertificate, Python for Beginners online course",
+    text: "My name is Ploy and I study in the science-math program. I became interested in computers when I built my first robot and saw that a few lines of code could make it follow a line. I want to study computer engineering so I can build tools that help students in rural schools learn.",
+    selected: ["cu-cedt", "kmitl-se", "cu-bba"],
+  };
+
+  const KEY = "portready.v1";
+  let state = { programs: BUILTIN.slice(), selected: new Set(EXAMPLE.selected), ai: null };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- section checkboxes ----------
+  $("secs").innerHTML = SECTIONS.map(s =>
+    `<label class="sec"><input type="checkbox" id="sec-${s.id}" value="${s.id}"><span>${esc(s.en)}<small>${esc(s.th)}</small></span></label>`).join("");
+
+  // ---------- profile io ----------
+  function readProfile() {
+    return {
+      name: $("f-name").value.trim(),
+      gpax: parseFloat($("f-gpax").value),
+      pages: parseInt($("f-pages").value, 10),
+      engType: $("f-eng").value,
+      engScore: parseFloat($("f-engscore").value),
+      sections: SECTIONS.filter(s => $("sec-" + s.id).checked).map(s => s.id),
+      activities: $("f-act").value,
+      awards: $("f-awards").value,
+      text: $("f-text").value,
+    };
+  }
+  function writeProfile(p) {
+    $("f-name").value = p.name || "";
+    $("f-gpax").value = Number.isFinite(p.gpax) ? p.gpax : "";
+    $("f-pages").value = Number.isFinite(p.pages) ? p.pages : "";
+    $("f-eng").value = p.engType || "";
+    $("f-engscore").value = Number.isFinite(p.engScore) ? p.engScore : "";
+    SECTIONS.forEach(s => { $("sec-" + s.id).checked = (p.sections || []).includes(s.id); });
+    $("f-act").value = p.activities || "";
+    $("f-awards").value = p.awards || "";
+    $("f-text").value = p.text || "";
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        profile: readProfile(), selected: [...state.selected],
+        custom: state.programs.filter(p => p.custom),
+      }));
+    } catch (e) {}
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return false;
+      const d = JSON.parse(raw);
+      if (Array.isArray(d.custom)) state.programs = BUILTIN.concat(d.custom);
+      if (Array.isArray(d.selected)) state.selected = new Set(d.selected.filter(id => state.programs.some(p => p.id === id)));
+      if (d.profile) writeProfile(d.profile);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  // ---------- rule engine ----------
+  const lines = s => String(s || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+  function check(prog, p) {
+    const checks = [];
+    let hardFail = false;
+
+    if (prog.minGpax) {
+      if (!Number.isFinite(p.gpax)) checks.push({ s: "warn", t: "GPAX", d: `Enter your GPAX. This program asks for at least ${prog.minGpax.toFixed(2)}.` });
+      else if (p.gpax >= prog.minGpax) checks.push({ s: "pass", t: "GPAX", d: `${p.gpax.toFixed(2)} meets the minimum of ${prog.minGpax.toFixed(2)}.` });
+      else { hardFail = true; checks.push({ s: "fail", t: "GPAX", d: `${p.gpax.toFixed(2)} is below the minimum of ${prog.minGpax.toFixed(2)}.` }); }
+    }
+
+    const eng = prog.english && Object.keys(prog.english).length ? prog.english : null;
+    if (eng) {
+      const accepted = Object.entries(eng).map(([k, v]) => `${k} ${v}`).join(", ");
+      if (!p.engType || !Number.isFinite(p.engScore)) { hardFail = true; checks.push({ s: "fail", t: "English score", d: `Required. Accepted: ${accepted}.` }); }
+      else if (!(p.engType in eng)) checks.push({ s: "warn", t: "English score", d: `${p.engType} isn't listed. Accepted: ${accepted}.` });
+      else if (p.engScore >= eng[p.engType]) checks.push({ s: "pass", t: "English score", d: `${p.engType} ${p.engScore} meets the minimum of ${eng[p.engType]}.` });
+      else { hardFail = true; checks.push({ s: "fail", t: "English score", d: `${p.engType} ${p.engScore} is below ${eng[p.engType]}. You need +${(eng[p.engType] - p.engScore).toFixed(1)}.` }); }
+    }
+
+    if (prog.maxPages) {
+      if (!Number.isFinite(p.pages)) checks.push({ s: "warn", t: "Page limit", d: `Enter your page count. Limit is ${prog.maxPages} pages.` });
+      else if (p.pages <= prog.maxPages) checks.push({ s: "pass", t: "Page limit", d: `${p.pages} of ${prog.maxPages} pages.` });
+      else checks.push({ s: "fail", t: "Page limit", d: `${p.pages} pages. The limit is ${prog.maxPages}, so cut ${p.pages - prog.maxPages}.` });
+    }
+
+    const req = prog.required || [];
+    if (req.length) {
+      const missing = req.filter(r => !p.sections.includes(r));
+      if (!missing.length) checks.push({ s: "pass", t: "Required sections", d: `All ${req.length} present.` });
+      else checks.push({ s: "fail", t: "Required sections", d: `Missing: ${missing.map(secName).join(", ")}.` });
+    }
+
+    if (prog.keywords && prog.keywords.length) {
+      const corpus = (p.activities + "\n" + p.awards + "\n" + p.text).toLowerCase();
+      const hit = prog.keywords.filter(k => corpus.includes(k.toLowerCase()));
+      if (hit.length >= 3) checks.push({ s: "pass", t: "Fit with the program", d: `Your entries mention ${hit.slice(0, 5).join(", ")}.` });
+      else if (hit.length) checks.push({ s: "warn", t: "Fit with the program", d: `Only ${hit.join(", ")} connects to this program. Add more evidence.` });
+      else checks.push({ s: "fail", t: "Fit with the program", d: `Nothing yet shows interest in this field.` });
+    }
+
+    if (prog.preferAwards) {
+      const n = lines(p.awards).length;
+      checks.push(n ? { s: "pass", t: "Awards", d: `${n} listed.` } : { s: "warn", t: "Awards", d: "This program values awards. Add any certificate you have." });
+    }
+
+    const pts = checks.reduce((a, c) => a + (c.s === "pass" ? 1 : c.s === "warn" ? 0.5 : 0), 0);
+    const score = checks.length ? Math.round((pts / checks.length) * 100) : 0;
+    const verdict = hardFail ? "not_yet" : score >= 85 ? "ready" : "almost";
+    return { checks, score, verdict };
+  }
+  const VERDICT = { ready: "Ready", almost: "Almost", not_yet: "Not yet" };
+
+  // ---------- rendering ----------
+  function renderChips() {
+    $("chips").innerHTML = state.programs.map(p => `
+      <label class="chip ${state.selected.has(p.id) ? "on" : ""}">
+        <input type="checkbox" data-id="${esc(p.id)}" ${state.selected.has(p.id) ? "checked" : ""}>
+        <span class="u">${esc(p.uni)}</span><b>${esc(shortName(p.program))}</b>${p.custom ? '<span class="new">Added</span>' : ""}
+      </label>`).join("");
+  }
+  const shortName = s => { const m = String(s).match(/\(([^)]+)\)/); return m && m[1].length <= 8 ? m[1] : String(s).replace(/\s*\(.*\)/, ""); };
+
+  function ring(score, verdict) {
+    const r = 26, c = 2 * Math.PI * r, off = c * (1 - score / 100);
+    const col = verdict === "ready" ? "var(--ok)" : verdict === "almost" ? "var(--warn)" : "var(--bad)";
+    return `<svg class="ring" viewBox="0 0 64 64" role="img" aria-label="Readiness ${score} percent">
+      <circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/>
+      <circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round"
+        stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 32 32)"/>
+      <text x="32" y="38" text-anchor="middle">${score}</text></svg>`;
+  }
+  const ICON = { pass: "✓", warn: "!", fail: "✕" };
+
+  function render() {
+    renderChips();
+    const p = readProfile();
+    const progs = state.programs.filter(x => state.selected.has(x.id));
+    const results = progs.map(x => ({ prog: x, ...check(x, p) }));
+
+    const ready = results.filter(r => r.verdict === "ready").length;
+    const fixes = results.reduce((a, r) => a + r.checks.filter(c => c.s !== "pass").length, 0);
+    const avg = results.length ? Math.round(results.reduce((a, r) => a + r.score, 0) / results.length) : 0;
+    $("summary").innerHTML = results.length ? `
+      <div><span class="k">Programs</span><span class="v">${results.length}</span></div>
+      <div><span class="k">Ready now</span><span class="v">${ready}</span></div>
+      <div><span class="k">Things to fix</span><span class="v">${fixes}</span></div>
+      <div><span class="k">Avg readiness</span><span class="v">${avg}%</span></div>` : "";
+
+    if (!results.length) {
+      $("slips").innerHTML = `<div class="empty">Pick at least one program in Step 2 to see your checklist.</div>`;
+      $("overall").innerHTML = "";
+      return;
+    }
+    const ai = state.ai;
+    $("overall").innerHTML = ai && ai.overall ? `
+      <div class="overall"><p class="eyebrow" style="color:var(--accent)">AI summary</p><p>${esc(ai.overall)}</p>
+      ${Array.isArray(ai.priorities) && ai.priorities.length ? `<ol>${ai.priorities.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}</div>` : "";
+
+    $("slips").innerHTML = results.map(r => {
+      const a = ai && ai.byId ? ai.byId[r.prog.id] : null;
+      const eng = r.prog.english ? Object.entries(r.prog.english).map(([k, v]) => `${k} ${v}`).join(" / ") : "No English test";
+      return `<article class="slip">
+        <div class="slip-head">
+          ${ring(r.score, r.verdict)}
+          <div style="min-width:0">
+            <div class="uni">${esc(r.prog.uni)} · ${esc(r.prog.faculty)}</div>
+            <h3>${esc(r.prog.program)}</h3>
+            <div class="meta">TCAS1 Portfolio · GPAX ≥ ${r.prog.minGpax ? r.prog.minGpax.toFixed(2) : "—"} · ${esc(eng)} · ≤ ${r.prog.maxPages || "—"} pages</div>
+          </div>
+          <div class="stamp ${r.verdict}">${VERDICT[r.verdict]}</div>
+        </div>
+        <ul class="checks">${r.checks.map(c => `<li><span class="ic ${c.s}" aria-label="${c.s}">${ICON[c.s]}</span><span><b>${esc(c.t)}</b><span class="d">${esc(c.d)}</span></span></li>`).join("")}</ul>
+        ${r.prog.lookFor ? `<div class="lookfor"><span class="lbl">What they look for</span>${esc(r.prog.lookFor)}</div>` : ""}
+        ${a ? `<div class="ai-panel"><h4>AI review</h4><p>${esc(a.summary)}</p>
+          <div class="ai-cols">
+            ${col("Strengths", a.strengths)}${col("Gaps", a.gaps)}${col("Do next", a.nextSteps)}
+          </div></div>` : ""}
+      </article>`;
+    }).join("");
+  }
+  const col = (t, arr) => `<div><span class="lbl">${t}</span><ul>${(Array.isArray(arr) ? arr : []).slice(0, 5).map(x => `<li>${esc(x)}</li>`).join("") || "<li>—</li>"}</ul></div>`;
+
+  // ---------- events ----------
+  $("profile").addEventListener("input", () => { render(); save(); });
+  $("profile").addEventListener("submit", e => e.preventDefault());
+  $("chips").addEventListener("change", e => {
+    const id = e.target.dataset.id; if (!id) return;
+    e.target.checked ? state.selected.add(id) : state.selected.delete(id);
+    render(); save();
+  });
+  $("sampleBtn").onclick = () => { writeProfile(EXAMPLE); state.selected = new Set(EXAMPLE.selected); state.ai = null; render(); save(); };
+  $("clearBtn").onclick = () => { writeProfile({}); state.ai = null; render(); save(); };
+  $("loadTxt").onclick = () => $("txtFile").click();
+  $("txtFile").onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => { $("f-text").value = String(rd.result).slice(0, 12000); render(); save(); };
+    rd.readAsText(f);
+    e.target.value = "";
+  };
+
+  // ---------- AI (Claude via the sample capability) ----------
+  let sample = null, ctl = null;
+  const ERR = {
+    not_granted: "AI review was not allowed for this page.",
+    sampling_disabled: "AI isn't available for this account.",
+    rate_limited: "Too many requests right now. Wait a minute and try again.",
+    session_expired: "Sign in to Claude again, then retry.",
+    invalid_json: "The AI reply couldn't be read. Try again.",
+    refused: "The AI declined this request. Check the text you pasted.",
+    prompt_too_large: "Too much text. Shorten the portfolio text and try again.",
+  };
+  const errMsg = e => ERR[e && e.code] || "Something went wrong reaching the AI. Try again.";
+  const HIDE = ["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"];
+
+  let aiOk = false;
+  function setAiAvailable(ok) {
+    aiOk = ok;
+    $("aiBtn").disabled = !ok; $("parseBtn").disabled = !ok;
+    if (!ok) {
+      $("aiHint").textContent = "AI review runs when this page is opened in Claude. The rule checks below still work.";
+      $("parseStatus").textContent = "Needs the page opened in Claude.";
+    }
+  }
+  setAiAvailable(false);
+  $("aiHint").textContent = "Connecting to the AI reviewer…";
+  (async () => {
+    try { sample = window.claude && window.claude.use ? await window.claude.use("sample") : null; } catch (e) { sample = null; }
+    setAiAvailable(!!sample);
+    if (sample) { $("aiHint").textContent = "Reads your portfolio against every program you picked and tells you what to fix first."; $("parseStatus").textContent = ""; }
+  })();
+
+  function showStatus(msg, err) { const s = $("aiStatus"); s.hidden = !msg; s.textContent = msg || ""; s.className = "status" + (err ? " err" : ""); }
+
+  $("aiBtn").onclick = async () => {
+    const p = readProfile();
+    const progs = state.programs.filter(x => state.selected.has(x.id));
+    if (!progs.length) { showStatus("Pick at least one program first.", true); return; }
+    const lang = $("aiLang").value;
+    const payload = {
+      student: { name: p.name, gpax: p.gpax, portfolioPages: p.pages, english: p.engType ? `${p.engType} ${p.engScore}` : "none",
+        sectionsIncluded: p.sections.map(secName), activities: lines(p.activities), awards: lines(p.awards), portfolioText: p.text.slice(0, 6000) },
+      programs: progs.map(x => ({ id: x.id, university: x.uni, faculty: x.faculty, program: x.program, minGpax: x.minGpax, english: x.english,
+        maxPages: x.maxPages, requiredSections: (x.required || []).map(secName), whatTheyLookFor: x.lookFor,
+        ruleCheck: check(x, p).checks.map(c => `${c.s.toUpperCase()}: ${c.t} — ${c.d}`) })),
+    };
+    const prompt = `You are an admissions advisor helping a Thai high-school student prepare a TCAS Round 1 portfolio.
+Review the student's portfolio against each target program's requirements. The "ruleCheck" lines are automatic checks already shown to the student; build on them, do not just repeat them.
+Be specific to this student's actual activities and text. Suggest concrete changes (what to add, cut, reorder, or rewrite), and name which existing activity to feature for each program.
+Write every string in ${lang}. Keep each list item under 25 words.
+
+Reply with only JSON in this shape:
+{"overall": "2-3 sentences on the student's overall position",
+ "priorities": ["the 3 most important fixes across all programs, most urgent first"],
+ "programs": [{"id": "<program id>", "summary": "1-2 sentences", "strengths": ["..."], "gaps": ["..."], "nextSteps": ["..."]}]}
+
+DATA:
+${JSON.stringify(payload, null, 1)}`;
+
+    ctl = new AbortController();
+    $("aiBtn").disabled = true; $("stopBtn").hidden = false;
+    showStatus("Reviewing your portfolio. This usually takes 20–60 seconds…");
+    try {
+      const res = await sample.json(prompt, { signal: ctl.signal, cache: false });
+      const byId = {};
+      (Array.isArray(res && res.programs) ? res.programs : []).forEach(x => { if (x && x.id) byId[String(x.id)] = x; });
+      state.ai = { overall: res && res.overall ? String(res.overall) : "", priorities: Array.isArray(res && res.priorities) ? res.priorities.map(String) : [], byId };
+      showStatus("");
+      render();
+    } catch (e) {
+      if (e && e.code === "cancelled") showStatus("");
+      else { showStatus(errMsg(e), true); if (HIDE.includes(e && e.code)) setAiAvailable(false); }
+    } finally {
+      $("stopBtn").hidden = true; $("aiBtn").disabled = !aiOk;
+    }
+  };
+  $("stopBtn").onclick = () => ctl && ctl.abort();
+
+  $("parseBtn").onclick = async () => {
+    const txt = $("annText").value.trim();
+    if (txt.length < 30) { $("parseStatus").textContent = "Paste the requirement section first."; return; }
+    const ids = SECTIONS.map(s => `${s.id} (${s.en} / ${s.th})`).join(", ");
+    const prompt = `Extract the TCAS portfolio-round admission requirements from this Thai university announcement text.
+Reply with only JSON in this shape:
+{"uni": "short university name in English", "faculty": "faculty in English", "program": "program name in English",
+ "minGpax": number or null, "english": {"IELTS": number, "TOEFL iBT": number, "DET": number, "CU-TEP": number} or null (include only tests the text lists),
+ "maxPages": number or null, "required": [section ids], "keywords": ["8-12 lowercase English keywords for the field and the evidence they value"],
+ "lookFor": "one English sentence on what the program looks for"}
+Allowed section ids: ${ids}. Use only ids that the text actually asks for. Use null when the text doesn't say.
+
+ANNOUNCEMENT:
+${txt.slice(0, 15000)}`;
+    $("parseBtn").disabled = true; $("parseStatus").textContent = "Reading the announcement…";
+    try {
+      const r = await sample.json(prompt, { modelTier: "default" });
+      const okIds = new Set(SECTIONS.map(s => s.id));
+      const num = v => (typeof v === "number" && isFinite(v) ? v : null);
+      let eng = null;
+      if (r.english && typeof r.english === "object") {
+        eng = {}; for (const [k, v] of Object.entries(r.english)) if (num(v) !== null) eng[k] = v;
+        if (!Object.keys(eng).length) eng = null;
+      }
+      const prog = {
+        id: "custom-" + Date.now(), custom: true,
+        uni: String(r.uni || "University"), faculty: String(r.faculty || ""), program: String(r.program || "New program"),
+        minGpax: num(r.minGpax), english: eng, maxPages: num(r.maxPages),
+        required: (Array.isArray(r.required) ? r.required : []).map(String).filter(x => okIds.has(x)),
+        keywords: (Array.isArray(r.keywords) ? r.keywords : []).map(x => String(x).toLowerCase()).slice(0, 14),
+        preferAwards: false, lookFor: r.lookFor ? String(r.lookFor) : "",
+      };
+      state.programs.push(prog); state.selected.add(prog.id);
+      $("annText").value = ""; $("parseStatus").textContent = `Added ${prog.uni}: ${prog.program}.`;
+      render(); save();
+    } catch (e) {
+      $("parseStatus").textContent = errMsg(e);
+      if (HIDE.includes(e && e.code)) setAiAvailable(false);
+    } finally {
+      $("parseBtn").disabled = !aiOk;
+    }
+  };
+
+  // ---------- boot ----------
+  if (!load()) writeProfile(EXAMPLE);
+  render();
+})();
+</script>
+
+</body>
+</html>
